@@ -154,6 +154,7 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     @Override
     public boolean execute() throws SQLException {
         try {
+            //进行路由
             Collection<PreparedStatementUnit> preparedStatementUnits = route();
             return new PreparedStatementExecutor(
                     getConnection().getShardingContext().getExecutorEngine(), routeResult.getSqlStatement().getType(), preparedStatementUnits).execute();

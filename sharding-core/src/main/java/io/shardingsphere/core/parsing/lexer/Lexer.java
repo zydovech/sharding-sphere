@@ -48,35 +48,52 @@ public class Lexer {
      * Analyse next token.
      */
     public final void nextToken() {
+        //先跳过需要忽略的
         skipIgnoredToken();
         if (isVariableBegin()) {
+            //变量
             currentToken = new Tokenizer(input, dictionary, offset).scanVariable();
         } else if (isNCharBegin()) {
             currentToken = new Tokenizer(input, dictionary, ++offset).scanChars();
         } else if (isIdentifierBegin()) {
+            // Keyword + Literals.IDENTIFIER
             currentToken = new Tokenizer(input, dictionary, offset).scanIdentifier();
         } else if (isHexDecimalBegin()) {
+            // 十六进制
             currentToken = new Tokenizer(input, dictionary, offset).scanHexDecimal();
         } else if (isNumberBegin()) {
+            //数字
             currentToken = new Tokenizer(input, dictionary, offset).scanNumber();
         } else if (isSymbolBegin()) {
+            //符号
             currentToken = new Tokenizer(input, dictionary, offset).scanSymbol();
         } else if (isCharsBegin()) {
+            //字符串
             currentToken = new Tokenizer(input, dictionary, offset).scanChars();
         } else if (isEnd()) {
+            //结束
             currentToken = new Token(Assist.END, "", offset);
         } else {
             throw new SQLParsingException(this, Assist.ERROR);
         }
         offset = currentToken.getEndPosition();
     }
-    
+
+    /**
+     * 跳过忽略的词法标记
+     * 1. SQL 注释
+     * 2. 空格
+     * 3. SQL Hint
+     */
     private void skipIgnoredToken() {
+        //跳过空格
         offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
+        //Sql Hint
         while (isHintBegin()) {
             offset = new Tokenizer(input, dictionary, offset).skipHint();
             offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
         }
+        //注释
         while (isCommentBegin()) {
             offset = new Tokenizer(input, dictionary, offset).skipComment();
             offset = new Tokenizer(input, dictionary, offset).skipWhitespace();

@@ -58,9 +58,13 @@ public final class StandardRoutingEngine implements RoutingEngine {
     
     @Override
     public RoutingResult route() {
+        //根据逻辑表名 从shardingRule中 选择一个TableRule
         TableRule tableRule = shardingRule.getTableRule(logicTableName);
+        //获取数据库的分片字段 支持多个字段一起分片
         Collection<String> databaseShardingColumns = shardingRule.getDatabaseShardingStrategy(tableRule).getShardingColumns();
+        //获取表的分片字段名字
         Collection<String> tableShardingColumns = shardingRule.getTableShardingStrategy(tableRule).getShardingColumns();
+
         Collection<DataNode> routedDataNodes = new LinkedHashSet<>();
         if (HintManagerHolder.isUseShardingHint()) {
             List<ShardingValue> databaseShardingValues = getDatabaseShardingValuesFromHint(databaseShardingColumns);

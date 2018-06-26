@@ -28,10 +28,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public final class Token {
-    
+    /**
+     * 词法标记类型
+     */
     private final TokenType type;
-    
+    /**
+     * 字面量
+     */
     private final String literals;
-    
+    /**
+     * 在 SQL 里的结束位置
+     */
     private final int endPosition;
 }
