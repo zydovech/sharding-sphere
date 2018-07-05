@@ -70,14 +70,18 @@ public final class Limit {
      * @param isFetchAll is fetch all data or not
      */
     public void processParameters(final List<Object> parameters, final boolean isFetchAll) {
+        //填充offset和count值到Limit中 ， 记录了原始的offset和count值
         fill(parameters);
+        //重写传递进来的参数
         rewrite(parameters, isFetchAll);
     }
     
     private void fill(final List<Object> parameters) {
         int offset = 0;
         if (null != this.offset) {
+            //如果index为-1 则代表不是占位符的情况，可以直接获取offset的值，否则从parameters中获取
             offset = -1 == this.offset.getIndex() ? getOffsetValue() : NumberUtil.roundHalfUp(parameters.get(this.offset.getIndex()));
+            //设置对的值
             this.offset.setValue(offset);
         }
         int rowCount = 0;
@@ -86,6 +90,7 @@ public final class Limit {
             this.rowCount.setValue(rowCount);
         }
         if (offset < 0 || rowCount < 0) {
+            //不允许出现负值
             throw new SQLParsingException("LIMIT offset and row count can not be a negative value.");
         }
     }
@@ -94,15 +99,20 @@ public final class Limit {
         int rewriteOffset = 0;
         int rewriteRowCount;
         if (isFetchAll) {
+            //如果获取全部，则count值为Integer.MAX_VALUE
             rewriteRowCount = Integer.MAX_VALUE;
         } else if (isNeedRewriteRowCount()) {
+            //如果是mysql数据库 则需要重写rowCount的值，重写为 之前的 offset + count
             rewriteRowCount = null == rowCount ? -1 : getOffsetValue() + rowCount.getValue();
         } else {
+            //不需要重写的话，则直接设置
             rewriteRowCount = rowCount.getValue();
         }
+        //更改parameters中的值，offset变为0
         if (null != offset && offset.getIndex() > -1) {
             parameters.set(offset.getIndex(), rewriteOffset);
         }
+        //更改parameters中的值，count变为offset+count
         if (null != rowCount && rowCount.getIndex() > -1) {
             parameters.set(rowCount.getIndex(), rewriteRowCount);
         }

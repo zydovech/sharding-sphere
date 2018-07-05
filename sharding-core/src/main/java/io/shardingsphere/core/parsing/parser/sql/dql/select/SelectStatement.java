@@ -49,21 +49,40 @@ import java.util.Set;
 @Setter
 @ToString(callSuper = true)
 public final class SelectStatement extends DQLStatement {
-    
+
+    /**
+     * 是否查询所有字段
+     */
     private boolean containStar;
-    
+    /**
+     * 最后一个查询项下一个 Token 的开始位置
+     */
     private int selectListLastPosition;
-    
+
+    /**
+     * 最后一个分组项下一个 Token 的开始位置
+     */
     private int groupByLastPosition;
-    
+    /**
+     * 查询项
+     */
     private final Set<SelectItem> items = new HashSet<>();
-    
+    /**
+     * 分组项
+     */
     private final List<OrderItem> groupByItems = new LinkedList<>();
-    
+    /**
+     * 排序项
+     */
     private final List<OrderItem> orderByItems = new LinkedList<>();
-    
+    /**
+     * 分页
+     */
     private Limit limit;
-    
+
+    /**
+     * 子查询
+     */
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
     private SelectStatement subQueryStatement;

@@ -74,7 +74,9 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     private final int resultSetConcurrency;
     
     private final int resultSetHoldability;
-    
+    /**
+     * 路由的引擎 进行
+     */
     private final PreparedStatementRoutingEngine routingEngine;
     
     private final List<BatchPreparedStatementUnit> batchStatementUnits = new LinkedList<>();
@@ -154,7 +156,7 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     @Override
     public boolean execute() throws SQLException {
         try {
-            //进行路由
+            //进行路由 ShardingPreparedStatement 实现了JDBC的接口。所以执行PreparedStatement的execute的时候，就会到这里来
             Collection<PreparedStatementUnit> preparedStatementUnits = route();
             return new PreparedStatementExecutor(
                     getConnection().getShardingContext().getExecutorEngine(), routeResult.getSqlStatement().getType(), preparedStatementUnits).execute();
@@ -167,9 +169,14 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     }
     
     private Collection<PreparedStatementUnit> route() throws SQLException {
+        //用于存放所有的可执行单元
         Collection<PreparedStatementUnit> result = new LinkedList<>();
+
+        //进行路由 得到路由结果
         routeResult = routingEngine.route(getParameters());
+
         for (SQLExecutionUnit each : routeResult.getExecutionUnits()) {
+            //遍历执行单元，创建最后的PreparedStatement 以及设置对应的参数
             PreparedStatement preparedStatement = generatePreparedStatement(each);
             routedStatements.add(preparedStatement);
             replaySetParameter(preparedStatement, each.getSqlUnit().getParameterSets().get(0));

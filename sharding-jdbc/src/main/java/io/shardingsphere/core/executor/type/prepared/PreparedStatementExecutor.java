@@ -75,6 +75,7 @@ public final class PreparedStatementExecutor {
                 return ((PreparedStatement) baseStatementUnit.getStatement()).executeUpdate();
             }
         });
+        //update 语句需要合并结果，计算总的数量
         return accumulate(results);
     }
     

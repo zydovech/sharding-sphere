@@ -54,7 +54,9 @@ public class GroupByClauseParser implements SQLClauseParser {
      * @param selectStatement select statement
      */
     public final void parse(final SelectStatement selectStatement) {
+
         if (!lexerEngine.skipIfEqual(DefaultKeyword.GROUP)) {
+            //如果不是group 则跳过。
             return;
         }
         lexerEngine.accept(DefaultKeyword.BY);

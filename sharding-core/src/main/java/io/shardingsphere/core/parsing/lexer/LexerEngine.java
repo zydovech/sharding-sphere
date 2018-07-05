@@ -116,7 +116,7 @@ public final class LexerEngine {
     
     /**
      * Adjust current token equals one of input tokens or not.
-     *
+     * 判断当前解析出来的Token 是否和传递进来的一致
      * @param tokenTypes to be adjusted token types
      * @return current token equals one of input tokens or not
      */
@@ -131,12 +131,13 @@ public final class LexerEngine {
     
     /**
      * Skip current token if equals one of input tokens.
-     *
+     * 如果当前的
      * @param tokenTypes to be adjusted token types
      * @return skipped current token or not
      */
     public boolean skipIfEqual(final TokenType... tokenTypes) {
         if (equalAny(tokenTypes)) {
+
             lexer.nextToken();
             return true;
         }

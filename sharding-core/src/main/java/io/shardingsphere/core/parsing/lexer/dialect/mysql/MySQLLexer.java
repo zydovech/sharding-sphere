@@ -40,11 +40,13 @@ public final class MySQLLexer extends Lexer {
     
     @Override
     protected boolean isCommentBegin() {
+        //mysql的注释是以
         return '#' == getCurrentChar(0) || super.isCommentBegin();
     }
     
     @Override
     protected boolean isVariableBegin() {
+        //mysql 的变量以@开头
         return '@' == getCurrentChar(0);
     }
 }

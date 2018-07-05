@@ -86,18 +86,26 @@ public final class ParsingSQLRouter implements ShardingRouter {
         if (sqlStatement instanceof InsertStatement) {
             generatedKey = getGenerateKey(shardingRule, (InsertStatement) sqlStatement, parameters);
         }
+
         SQLRouteResult result = new SQLRouteResult(sqlStatement, generatedKey);
         ShardingConditions shardingConditions = OptimizeEngineFactory.newInstance(shardingRule, sqlStatement, parameters, generatedKey).optimize();
         if (null != generatedKey) {
             setGeneratedKeys(result, generatedKey);
         }
+        //先进行route 得到路由结果
         RoutingResult routingResult = route(parameters, sqlStatement, shardingConditions);
+        //创建重写引擎
         SQLRewriteEngine rewriteEngine = new SQLRewriteEngine(shardingRule, logicSQL, databaseType, sqlStatement, shardingConditions, parameters);
         boolean isSingleRouting = routingResult.isSingleRouting();
+
+        //如果是SelectStatement 且Limit分页参数不为空 则处理Limit
         if (sqlStatement instanceof SelectStatement && null != ((SelectStatement) sqlStatement).getLimit()) {
+
             processLimit(parameters, (SelectStatement) sqlStatement, isSingleRouting);
         }
+        //对sql进行重写
         SQLBuilder sqlBuilder = rewriteEngine.rewrite(!isSingleRouting);
+
         for (TableUnit each : routingResult.getTableUnits().getTableUnits()) {
             result.getExecutionUnits().add(new SQLExecutionUnit(each.getDataSourceName(), rewriteEngine.generateSQL(each, sqlBuilder)));
         }
@@ -171,10 +179,13 @@ public final class ParsingSQLRouter implements ShardingRouter {
     
     private void processLimit(final List<Object> parameters, final SelectStatement selectStatement, final boolean isSingleRouting) {
         if (isSingleRouting) {
+            //单表route 则单表查询的结果就是符合要求的，直接清掉
             selectStatement.setLimit(null);
             return;
         }
+        //是否要获取全部的数据？
         boolean isNeedFetchAll = (!selectStatement.getGroupByItems().isEmpty() || !selectStatement.getAggregationSelectItems().isEmpty()) && !selectStatement.isSameGroupByAndOrderByItems();
+        //对参数进行处理，
         selectStatement.getLimit().processParameters(parameters, isNeedFetchAll);
     }
 }

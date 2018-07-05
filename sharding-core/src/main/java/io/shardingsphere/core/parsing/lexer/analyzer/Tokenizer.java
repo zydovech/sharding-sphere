@@ -55,9 +55,12 @@ public final class Tokenizer {
      */
     public int skipWhitespace() {
         int length = 0;
+        //不断的去掉空格
         while (CharType.isWhitespace(charAt(offset + length))) {
+
             length++;
         }
+        //返回去掉空格后的offset值
         return offset + length;
     }
     
@@ -136,9 +139,15 @@ public final class Tokenizer {
         while (isVariableChar(charAt(offset + length))) {
             length++;
         }
+        //返回一个Token
         return new Token(Literals.VARIABLE, input.substring(offset, offset + length), offset + length);
     }
-    
+
+    /**
+     * 标识符 加上.
+     * @param ch
+     * @return
+     */
     private boolean isVariableChar(final char ch) {
         return isIdentifierChar(ch) || '.' == ch;
     }
@@ -150,6 +159,7 @@ public final class Tokenizer {
      */
     public Token scanIdentifier() {
         if ('`' == charAt(offset)) {
+
             int length = getLengthUntilTerminatedChar('`');
             return new Token(Literals.IDENTIFIER, input.substring(offset, offset + length), offset + length);
         }
@@ -163,7 +173,12 @@ public final class Tokenizer {
         }
         return new Token(dictionary.findTokenType(literals, Literals.IDENTIFIER), literals, offset + length);
     }
-    
+
+    /**
+     * 处理到结束字符的长度 如`a``a`
+     * @param terminatedChar 结束字符
+     * @return
+     */
     private int getLengthUntilTerminatedChar(final char terminatedChar) {
         int length = 1;
         while (terminatedChar != charAt(offset + length) || hasEscapeChar(terminatedChar, offset + length)) {
@@ -297,6 +312,7 @@ public final class Tokenizer {
         }
         String literals = input.substring(offset, offset + length);
         Symbol symbol;
+        //如果获取不到对应的Symbol 则回退
         while (null == (symbol = Symbol.literalsOf(literals))) {
             literals = input.substring(offset, offset + --length);
         }

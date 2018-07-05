@@ -99,8 +99,10 @@ public final class DefaultKeyGenerator implements KeyGenerator {
     @Override
     public synchronized Number generateKey() {
         long currentMillis = timeService.getCurrentMillis();
+        //做了检查 ，防止时钟回拨
         Preconditions.checkState(lastTime <= currentMillis, "Clock is moving backwards, last time is %d milliseconds, current time is %d milliseconds", lastTime, currentMillis);
         if (lastTime == currentMillis) {
+            //如果在同一ms中需要生成了很多个ID 则可能超过sequence的范围
             if (0L == (sequence = (sequence + 1) & SEQUENCE_MASK)) {
                 currentMillis = waitUntilNextTime(currentMillis);
             }
@@ -120,5 +122,9 @@ public final class DefaultKeyGenerator implements KeyGenerator {
             time = timeService.getCurrentMillis();
         }
         return time;
+    }
+
+    public static void main(String[] args) {
+
     }
 }

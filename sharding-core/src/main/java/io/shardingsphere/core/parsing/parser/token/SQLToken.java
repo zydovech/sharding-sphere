@@ -19,7 +19,7 @@ package io.shardingsphere.core.parsing.parser.token;
 
 /**
  * SQL Token.
- *
+ * SQL 解析器 在解析的时候，会标记需要重写的部分，用SQLToken表示
  * @author zhangliang
  */
 public interface SQLToken {

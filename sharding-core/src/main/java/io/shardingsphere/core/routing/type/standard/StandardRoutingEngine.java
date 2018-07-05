@@ -81,8 +81,10 @@ public final class StandardRoutingEngine implements RoutingEngine {
                 routedDataNodes.addAll(route(tableRule, Collections.<ShardingValue>emptyList(), Collections.<ShardingValue>emptyList()));
             } else {
                 for (ShardingCondition each : shardingConditions.getShardingConditions()) {
+                    //获取数据库的value
                     List<ShardingValue> databaseShardingValues = getShardingValues(databaseShardingColumns, each);
                     List<ShardingValue> tableShardingValues = getShardingValues(tableShardingColumns, each);
+                    //根据数据库和表的分片值，来选择具体的DataNode
                     Collection<DataNode> dataNodes = route(tableRule, databaseShardingValues, tableShardingValues);
                     routedDataNodes.addAll(dataNodes);
                     if (each instanceof InsertShardingCondition) {
@@ -136,10 +138,15 @@ public final class StandardRoutingEngine implements RoutingEngine {
     }
     
     private Collection<String> routeDataSources(final TableRule tableRule, final List<ShardingValue> databaseShardingValues) {
+        //获取DataSource的值
         Collection<String> availableTargetDatabases = tableRule.getActualDatasourceNames();
+
+
         if (databaseShardingValues.isEmpty()) {
+            //如果没有数据库分片值，则直接返回所有可用的database
             return availableTargetDatabases;
         }
+        //利用分库策略，来确定当前sql操作 的数据库
         Collection<String> result = new LinkedHashSet<>(shardingRule.getDatabaseShardingStrategy(tableRule).doSharding(availableTargetDatabases, databaseShardingValues));
         Preconditions.checkState(!result.isEmpty(), "no database route info");
         return result;

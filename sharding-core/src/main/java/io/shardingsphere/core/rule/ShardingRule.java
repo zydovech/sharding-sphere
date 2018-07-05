@@ -154,6 +154,7 @@ public final class ShardingRule {
      * @return database sharding strategy
      */
     public ShardingStrategy getDatabaseShardingStrategy(final TableRule tableRule) {
+        //如果没有配置数据库的分库策略，则使用默认的
         return null == tableRule.getDatabaseShardingStrategy() ? defaultDatabaseShardingStrategy : tableRule.getDatabaseShardingStrategy();
     }
     

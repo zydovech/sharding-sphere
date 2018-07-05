@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public final class Token {
     /**
-     * 词法标记类型
+     * 词法标记类型 主要分为DefaultKeyword 、Literals 、Symbol 、Assist
      */
     private final TokenType type;
     /**

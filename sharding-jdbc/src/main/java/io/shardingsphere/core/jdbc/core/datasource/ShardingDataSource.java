@@ -65,7 +65,16 @@ public class ShardingDataSource extends AbstractDataSourceAdapter implements Aut
         if (!configMap.isEmpty()) {
             ConfigMapContext.getInstance().getShardingConfig().putAll(configMap);
         }
+        //通过配置来指定对应的参数
+        /*
+        *
+        *  <sharding:props>
+        *       <prop key="executor.size">12</prop>
+        *   </sharding:props>
+        *
+        * */
         shardingProperties = new ShardingProperties(null == props ? new Properties() : props);
+
         int executorSize = shardingProperties.getValue(ShardingPropertiesConstant.EXECUTOR_SIZE);
         executorEngine = new ExecutorEngine(executorSize);
         ShardingMetaData shardingMetaData = new JDBCShardingMetaData(executorEngine.getExecutorService(), dataSourceMap, shardingRule, getDatabaseType());

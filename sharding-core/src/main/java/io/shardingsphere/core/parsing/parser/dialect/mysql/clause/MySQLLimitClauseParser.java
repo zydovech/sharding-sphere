@@ -48,16 +48,20 @@ public final class MySQLLimitClauseParser implements SQLClauseParser {
      */
     public void parse(final SelectStatement selectStatement) {
         if (!lexerEngine.skipIfEqual(MySQLKeyword.LIMIT)) {
+            //不是Limit的话 则直接返回
             return;
         }
         int valueIndex = -1;
+        //获取当前Token的结束位置
         int valueBeginPosition = lexerEngine.getCurrentToken().getEndPosition();
         int value;
         boolean isParameterForValue = false;
         if (lexerEngine.equalAny(Literals.INT)) {
+            //如果是个int值，则获取
             value = Integer.parseInt(lexerEngine.getCurrentToken().getLiterals());
             valueBeginPosition = valueBeginPosition - (value + "").length();
         } else if (lexerEngine.equalAny(Symbol.QUESTION)) {
+            //如果是个占位符，则获取是第几个占位符
             valueIndex = selectStatement.getParametersIndex();
             value = -1;
             valueBeginPosition--;
@@ -67,18 +71,25 @@ public final class MySQLLimitClauseParser implements SQLClauseParser {
         }
         lexerEngine.nextToken();
         if (lexerEngine.skipIfEqual(Symbol.COMMA)) {
+            //如果是逗号，则已经获取到全部的limit数据，可以直接返回了
             selectStatement.setLimit(getLimitWithComma(valueIndex, valueBeginPosition, value, isParameterForValue, selectStatement));
             return;
         }
         if (lexerEngine.skipIfEqual(MySQLKeyword.OFFSET)) {
+            //如果是 limit 1 offset 10 的写法 也直接返回
             selectStatement.setLimit(getLimitWithOffset(valueIndex, valueBeginPosition, value, isParameterForValue, selectStatement));
             return;
         }
+
+        //当只有limit 10 这种写法的时候，会到下面来进行解析
         if (isParameterForValue) {
+            //若是占位符 则增加对应的index
             selectStatement.increaseParametersIndex();
         } else {
+            //不然新增RowCountToken
             selectStatement.getSqlTokens().add(new RowCountToken(valueBeginPosition, value));
         }
+        //创建Limit
         Limit limit = new Limit(DatabaseType.MySQL);
         limit.setRowCount(new LimitValue(value, valueIndex, false));
         selectStatement.setLimit(limit);
@@ -101,16 +112,22 @@ public final class MySQLLimitClauseParser implements SQLClauseParser {
             throw new SQLParsingException(lexerEngine);
         }
         lexerEngine.nextToken();
+
         if (isParameterForValue) {
+            //如果是占位符的，则增加parametersIndex的值
             selectStatement.increaseParametersIndex();
         } else {
+            //不是占位符的 则直接新增新的OffsetToken
             selectStatement.getSqlTokens().add(new OffsetToken(valueBeginPosition, value));
         }
         if (isParameterForRowCount) {
+            //如果是占位符的，则增加parametersIndex的值
             selectStatement.increaseParametersIndex();
         } else {
+            //不是占位符的 则直接新增新的RowCountToken
             selectStatement.getSqlTokens().add(new RowCountToken(rowCountBeginPosition, rowCountValue));
         }
+        //创建Limit
         Limit result = new Limit(DatabaseType.MySQL);
         result.setRowCount(new LimitValue(rowCountValue, rowCountIndex, false));
         result.setOffset(new LimitValue(value, index, true));

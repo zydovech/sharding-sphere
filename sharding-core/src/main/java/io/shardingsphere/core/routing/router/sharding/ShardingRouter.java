@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * Sharding router.
- * 
+ * 主要负责解析和路由
  * @author zhangiang
  */
 public interface ShardingRouter {

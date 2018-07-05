@@ -35,13 +35,23 @@ import lombok.RequiredArgsConstructor;
 public class Lexer {
     
     @Getter
+    /**
+     * 输入的sql
+     */
     private final String input;
-    
+    /**
+     * 关键字集合,对于Mysql来说 就是MySQLKeyword.values() 集合
+     */
     private final Dictionary dictionary;
-    
+    /**
+     * 当前解析到的位置
+     */
     private int offset;
     
     @Getter
+    /**
+     * 当前的token 一个Token代表一个符号。。Tokenizer用于分词
+     */
     private Token currentToken;
     
     /**
@@ -54,9 +64,10 @@ public class Lexer {
             //变量
             currentToken = new Tokenizer(input, dictionary, offset).scanVariable();
         } else if (isNCharBegin()) {
+
             currentToken = new Tokenizer(input, dictionary, ++offset).scanChars();
         } else if (isIdentifierBegin()) {
-            // Keyword + Literals.IDENTIFIER
+            // Keyword + Literals.IDENTIFIER 关键字和普通的字符串如表名 都是通过这个地方进行解析
             currentToken = new Tokenizer(input, dictionary, offset).scanIdentifier();
         } else if (isHexDecimalBegin()) {
             // 十六进制
@@ -65,7 +76,7 @@ public class Lexer {
             //数字
             currentToken = new Tokenizer(input, dictionary, offset).scanNumber();
         } else if (isSymbolBegin()) {
-            //符号
+            //符号 各种符号 如， > < 等
             currentToken = new Tokenizer(input, dictionary, offset).scanSymbol();
         } else if (isCharsBegin()) {
             //字符串
@@ -89,10 +100,12 @@ public class Lexer {
         //跳过空格
         offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
         //Sql Hint
+
         while (isHintBegin()) {
             offset = new Tokenizer(input, dictionary, offset).skipHint();
             offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
         }
+
         //注释
         while (isCommentBegin()) {
             offset = new Tokenizer(input, dictionary, offset).skipComment();
@@ -117,7 +130,11 @@ public class Lexer {
     protected boolean isSupportNChars() {
         return false;
     }
-    
+
+    /**
+     * 目前来说，SQLServer 独有：在 SQL Server 中處理 Unicode 字串常數時，必需為所有的 Unicode 字串加上前置詞 N
+     * @return
+     */
     private boolean isNCharBegin() {
         return isSupportNChars() && 'N' == getCurrentChar(0) && '\'' == getCurrentChar(1);
     }
@@ -150,8 +167,15 @@ public class Lexer {
     private boolean isEnd() {
         return offset >= input.length();
     }
-    
+
+
+    /**
+     * 相对于当前offset的位置，的符号
+     * @param offset 相对于当前offset的偏移
+     * @return
+     */
     protected final char getCurrentChar(final int offset) {
+        //超过范围 返回的是EOI
         return this.offset + offset >= input.length() ? (char) CharType.EOI : input.charAt(this.offset + offset);
     }
 }

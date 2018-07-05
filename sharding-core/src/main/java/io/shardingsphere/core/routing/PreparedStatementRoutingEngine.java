@@ -34,13 +34,24 @@ import java.util.List;
  * @author panjuan
  */
 public final class PreparedStatementRoutingEngine {
-    
+
+    /**
+     * 原来的sql
+     */
     private final String logicSQL;
-    
+
+    /**
+     * sharding 的路由器 见ParsingSQLRouter
+     */
     private final ShardingRouter shardingRouter;
-    
+    /**
+     * 主从的路由器
+     */
     private final ShardingMasterSlaveRouter masterSlaveRouter;
-    
+
+    /**
+     * 解析后的 sql语句
+     */
     private SQLStatement sqlStatement;
     
     public PreparedStatementRoutingEngine(final String logicSQL, final ShardingRule shardingRule, final ShardingMetaData shardingMetaData, final DatabaseType databaseType, final boolean showSQL) {
@@ -59,8 +70,10 @@ public final class PreparedStatementRoutingEngine {
      */
     public SQLRouteResult route(final List<Object> parameters) {
         if (null == sqlStatement) {
+            //如果还没有进行解析，则调用shardingRouter进行解析
             sqlStatement = shardingRouter.parse(logicSQL, true);
         }
+        //先经过shardingRouter 进行路由。。
         return masterSlaveRouter.route(shardingRouter.route(logicSQL, parameters, sqlStatement));
     }
 }

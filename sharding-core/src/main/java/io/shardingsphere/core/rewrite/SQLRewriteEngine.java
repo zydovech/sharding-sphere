@@ -129,8 +129,10 @@ public final class SQLRewriteEngine {
             } else if (each instanceof InsertValuesToken) {
                 appendInsertValuesToken(result, (InsertValuesToken) each, count, sqlTokens);
             } else if (each instanceof RowCountToken) {
+                //RowCountToken 只有在limit 后的count值不是占位符的时候 才会有该Token的存在 比如limit 1 或者limit 1,10
                 appendLimitRowCount(result, (RowCountToken) each, count, sqlTokens, isRewriteLimit);
             } else if (each instanceof OffsetToken) {
+                //OffsetToken 和RowCountToken一样，只有在offset值不是占位符的时候，才会有该Token的存在
                 appendLimitOffsetToken(result, (OffsetToken) each, count, sqlTokens, isRewriteLimit);
             } else if (each instanceof OrderByToken) {
                 appendOrderByToken(result, count, sqlTokens);

@@ -108,8 +108,11 @@ public abstract class AbstractSelectParser implements SQLParser {
     }
     
     private void parseTable(final SelectStatement selectStatement) {
+        //如果和( 相等，则跳过当前的符号，不再解析
         if (lexerEngine.skipIfEqual(Symbol.LEFT_PAREN)) {
+            //解析子查询的 子查询也是使用同样的套路 再来一次查询
             selectStatement.setSubQueryStatement(parseInternal());
+            //这个地方没看懂 直接返回是啥意思？20180704
             if (lexerEngine.equalAny(DefaultKeyword.WHERE, Assist.END)) {
                 return;
             }

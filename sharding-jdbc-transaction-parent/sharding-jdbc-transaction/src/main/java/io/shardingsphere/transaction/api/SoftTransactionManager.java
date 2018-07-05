@@ -56,6 +56,7 @@ public final class SoftTransactionManager {
      * @throws SQLException SQL exception
      */
     public void init() throws SQLException {
+        //向全局注册一个BestEffortsDeliveryListener
         EventBusInstance.getInstance().register(new BestEffortsDeliveryListener());
         if (TransactionLogDataSourceType.RDB == transactionConfig.getStorageType()) {
             Preconditions.checkNotNull(transactionConfig.getTransactionLogDataSource());
